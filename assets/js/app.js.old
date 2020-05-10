@@ -1,7 +1,11 @@
 "use strict";
+
 let slideCurrentIndex = 0;
+
 const slideSelectorRoot = "div.slide";
+
 const slideSelectors = [
+
     `${slideSelectorRoot}.supergirl`,
     `${slideSelectorRoot}.chair`,
     `${slideSelectorRoot}.knjr`,
@@ -9,53 +13,81 @@ const slideSelectors = [
     `${slideSelectorRoot}.grandpa`,
     `${slideSelectorRoot}.park`,
     `${slideSelectorRoot}.burp`,
-    `${slideSelectorRoot}.milk`
+    `${slideSelectorRoot}.milk`,
 ];
+
 const nextSlideBtnElement = $("#nextBtn");
-async function slideFadeIn(slideSelector) {
-    return new Promise(async (resolve) => {
+
+function slideFadeIn(slideSelector) {
+
+    return new Promise((resolve) => {
+
         const slideElement = $(slideSelector);
-        await slideElement.fadeTo(0, 0).promise();
-        await slideElement.fadeTo(1000, 1).promise();
-        resolve();
+
+        slideElement
+            .fadeTo(0, 0.0)
+            .promise()
+            .then(() => slideElement.fadeTo(1000, 1.0).promise())
+            .then(resolve);
     });
 }
-async function slideFadeOut(slideSelector) {
-    return new Promise(async (resolve) => {
+
+function slideFadeOut(slideSelector) {
+
+    return new Promise((resolve) => {
+
         const slideElement = $(slideSelector);
-        await slideElement.fadeTo(500, 0).promise();
-        await slideElement.hide().promise();
-        resolve();
+
+        slideElement
+            .fadeTo(500, 0.0)
+            .promise()
+            .then(() => slideElement.hide().promise())
+            .then(resolve);
     });
 }
+
 function incrementSlide() {
+
     if (slideCurrentIndex === slideSelectors.length - 1) {
+
         slideCurrentIndex = 0;
     }
     else {
+
         slideCurrentIndex++;
     }
 }
+
 function setNextBtnText() {
+
     if (slideCurrentIndex < slideSelectors.length - 1) {
+
         nextSlideBtnElement.text("Next >>>");
     }
     else {
+
         nextSlideBtnElement.text("Start Over >>>");
     }
 }
-async function listenForNextSlide() {
-    return new Promise((resolve) => {
-        nextSlideBtnElement.one("click", resolve);
-    });
-}
-async function nextSlide() {
+
+function nextSlide() {
+
     setNextBtnText();
+
     const currentSlideSelector = slideSelectors[slideCurrentIndex];
-    await slideFadeIn(currentSlideSelector);
-    await listenForNextSlide();
-    await slideFadeOut(currentSlideSelector);
-    incrementSlide();
-    nextSlide();
+
+    slideFadeIn(currentSlideSelector)
+        .then(() => new Promise((resolve) => nextSlideBtnElement.one("click", resolve)))
+        .then(() => slideFadeOut(currentSlideSelector))
+        .then(() => { 
+
+            incrementSlide();
+
+            nextSlide();
+        });
 }
-jQuery(nextSlide);
+
+$(document).ready(() => {
+
+    nextSlide();
+});
