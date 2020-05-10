@@ -12,6 +12,16 @@ const slideSelectors = [
     `${slideSelectorRoot}.milk`
 ];
 const nextSlideBtnElement = $("#nextBtn");
+jQuery(nextSlide);
+async function nextSlide() {
+    const currentSlideSelector = slideSelectors[slideCurrentIndex];
+    await slideFadeIn(currentSlideSelector);
+    await listenForNextSlide();
+    await slideFadeOut(currentSlideSelector);
+    incrementSlide();
+    setNextBtnText();
+    nextSlide();
+}
 async function slideFadeIn(slideSelector) {
     return new Promise(async (resolve) => {
         const slideElement = $(slideSelector);
@@ -20,11 +30,16 @@ async function slideFadeIn(slideSelector) {
         resolve();
     });
 }
+async function listenForNextSlide() {
+    return new Promise((resolve) => {
+        nextSlideBtnElement.one("click", resolve);
+    });
+}
 async function slideFadeOut(slideSelector) {
     return new Promise(async (resolve) => {
         const slideElement = $(slideSelector);
         await slideElement.fadeTo(500, 0).promise();
-        await slideElement.hide().promise();
+        slideElement.hide();
         resolve();
     });
 }
@@ -44,18 +59,3 @@ function setNextBtnText() {
         nextSlideBtnElement.text("Start Over >>>");
     }
 }
-async function listenForNextSlide() {
-    return new Promise((resolve) => {
-        nextSlideBtnElement.one("click", resolve);
-    });
-}
-async function nextSlide() {
-    setNextBtnText();
-    const currentSlideSelector = slideSelectors[slideCurrentIndex];
-    await slideFadeIn(currentSlideSelector);
-    await listenForNextSlide();
-    await slideFadeOut(currentSlideSelector);
-    incrementSlide();
-    nextSlide();
-}
-jQuery(nextSlide);
